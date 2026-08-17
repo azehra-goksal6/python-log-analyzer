@@ -99,6 +99,24 @@ def analyze_log(file_path):
         if not brute_force_found:
             print("Brute-force saldırısı tespit edilmedi.")
 
+        print("\n--- GÜVENLİK RİSK RAPORU ---")
+
+        total_failed_logins = sum(failed_ip_counts.values())
+
+        if total_failed_logins == 0:
+            risk_level = "LOW"
+        elif total_failed_logins <= 2:
+            risk_level = "MEDIUM"
+        elif total_failed_logins <= 5:
+            risk_level = "HIGH"
+        else:
+            risk_level = "CRITICAL"
+
+        print(f"Toplam başarısız giriş: {total_failed_logins}")
+        print(f"Risk Seviyesi: {risk_level}")
+
+
+
     except FileNotFoundError:
         print(f"HATA: {file_path} bulunamadı.")
 
