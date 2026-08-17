@@ -14,6 +14,7 @@ def analyze_log(file_path):
     critical_logs = []
     event_types = []
     ip_addresses = []
+    failed_login_ips = []
 
     try:
         with open(file_path, "r") as file:
@@ -37,6 +38,9 @@ def analyze_log(file_path):
                         )
 
                         ip_addresses.extend(ips)
+
+                        if keyword == "Failed password":
+                            failed_login_ips.extend(ips)
 
                         break
 
@@ -63,6 +67,20 @@ def analyze_log(file_path):
                 print(f"{ip}: {count} olay")
         else:
             print("Şüpheli IP adresi bulunamadı.")
+
+        print("\n--- ŞÜPHELİ IP ADRESLERİ ---")
+
+        failed_ip_counts = Counter(failed_login_ips)
+
+        suspicious_found = False
+
+        for ip, count in failed_ip_counts.items():
+            if count >= 3:
+                print(f"UYARI: {ip} adresinden {count} başarısız giriş!")
+                suspicious_found = True
+
+        if not suspicious_found:
+            print("Şüpheli IP tespit edilmedi.")
 
     except FileNotFoundError:
         print(f"HATA: {file_path} bulunamadı.")
