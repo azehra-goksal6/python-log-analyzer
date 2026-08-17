@@ -82,6 +82,23 @@ def analyze_log(file_path):
         if not suspicious_found:
             print("Şüpheli IP tespit edilmedi.")
 
+
+                
+        print("\n--- BRUTE-FORCE SALDIRISI TESPİTİ ---")
+
+        brute_force_found = False
+
+        for ip, count in failed_ip_counts.items():
+            if count >= 3:
+                print(
+                    f"UYARI: {ip} adresinde olası brute-force saldırısı! "
+                    f"{count} başarısız giriş tespit edildi."
+                )
+                brute_force_found = True
+
+        if not brute_force_found:
+            print("Brute-force saldırısı tespit edilmedi.")
+
     except FileNotFoundError:
         print(f"HATA: {file_path} bulunamadı.")
 
