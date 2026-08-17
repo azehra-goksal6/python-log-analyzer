@@ -16,6 +16,7 @@ def analyze_log(file_path):
     ip_addresses = []
     usernames = []
     failed_login_ips = []
+    report_lines = []
 
     try:
         with open(file_path, "r") as file:
@@ -135,6 +136,44 @@ def analyze_log(file_path):
 
         print(f"Toplam başarısız giriş: {total_failed_logins}")
         print(f"Risk Seviyesi: {risk_level}")
+
+
+        report_lines.append("=== GÜVENLİK RAPORU ===")
+        report_lines.append(f"Toplam kritik olay: {len(critical_logs)}")
+        report_lines.append(f"Toplam başarısız giriş: {total_failed_logins}")
+        report_lines.append(f"Risk Seviyesi: {risk_level}")
+
+        report_lines.append("\nŞüpheli IP Adresleri:")
+
+        for ip, count in failed_ip_counts.items():
+            if count >= 3:
+                report_lines.append(
+                    f"{ip} -> {count} başarısız giriş"
+                )
+
+        report_lines.append("\nHedef Kullanıcılar:")
+
+        for user, count in Counter(usernames).items():
+            report_lines.append(
+                f"{user} -> {count} başarısız giriş"
+            )
+
+        report_lines.append("\nBrute-force:")
+
+        if brute_force_found:
+            for ip, count in failed_ip_counts.items():
+                if count >= 3:
+                    report_lines.append(
+                        f"{ip} -> TESPİT EDİLDİ ({count} başarısız giriş)"
+                    )
+        else:
+            report_lines.append("Tespit edilmedi.")
+
+        with open("security_report.txt", "w", encoding="utf-8") as report_file:
+            report_file.write("\n".join(report_lines))
+
+        print("\nGüvenlik raporu security_report.txt dosyasına kaydedildi.")
+
 
 
 

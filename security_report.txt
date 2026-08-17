@@ -1,0 +1,15 @@
+=== GÜVENLİK RAPORU ===
+Toplam kritik olay: 8
+Toplam başarısız giriş: 5
+Risk Seviyesi: HIGH
+
+Şüpheli IP Adresleri:
+203.0.113.1 -> 4 başarısız giriş
+
+Hedef Kullanıcılar:
+root -> 1 başarısız giriş
+user2 -> 1 başarısız giriş
+user -> 3 başarısız giriş
+
+Brute-force:
+203.0.113.1 -> TESPİT EDİLDİ (4 başarısız giriş)
