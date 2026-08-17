@@ -14,6 +14,7 @@ def analyze_log(file_path):
     critical_logs = []
     event_types = []
     ip_addresses = []
+    usernames = []
     failed_login_ips = []
 
     try:
@@ -39,9 +40,19 @@ def analyze_log(file_path):
 
                         ip_addresses.extend(ips)
 
+                        # Başarısız giriş yapan IP'leri ayrıca kaydet
                         if keyword == "Failed password":
                             failed_login_ips.extend(ips)
 
+                            # Kullanıcı adını bul
+                            user_match = re.search(
+                                r'Failed password for (?:invalid user )?(\w+)',
+                                line,
+                                re.IGNORECASE
+                            )
+
+                            if user_match:
+                                usernames.append(user_match.group(1))
                         break
 
         print("--- KRİTİK GÜVENLİK OLAYLARI RAPORU ---")
@@ -82,6 +93,16 @@ def analyze_log(file_path):
         if not suspicious_found:
             print("Şüpheli IP tespit edilmedi.")
 
+
+        print("\n--- HEDEF KULLANICILAR ---")
+
+        if usernames:
+            user_counts = Counter(usernames)
+
+            for user, count in user_counts.items():
+                print(f"{user}: {count} başarısız giriş")
+        else:
+            print("Kullanıcı bilgisi bulunamadı.")
 
                 
         print("\n--- BRUTE-FORCE SALDIRISI TESPİTİ ---")
