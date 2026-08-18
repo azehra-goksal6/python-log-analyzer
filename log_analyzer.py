@@ -17,6 +17,7 @@ def analyze_log(file_path):
     usernames = []
     failed_login_ips = []
     report_lines = []
+    attack_times = []
 
     try:
         with open(file_path, "r") as file:
@@ -40,12 +41,16 @@ def analyze_log(file_path):
                         )
 
                         ip_addresses.extend(ips)
-
-                        # Başarısız giriş yapan IP'leri ayrıca kaydet
                         if keyword == "Failed password":
-                            failed_login_ips.extend(ips)
 
-                            # Kullanıcı adını bul
+                            time_match = re.search(
+                                r'(\w{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2})',
+                                line
+                            )
+
+                            if time_match:
+                                attack_times.append(time_match.group(1))
+
                             user_match = re.search(
                                 r'Failed password for (?:invalid user )?(\w+)',
                                 line,
@@ -54,6 +59,10 @@ def analyze_log(file_path):
 
                             if user_match:
                                 usernames.append(user_match.group(1))
+
+                            # Başarısız giriş yapan IP'leri kaydet
+                            if keyword == "Failed password":
+                                failed_login_ips.extend(ips)    
                         break
 
         print("--- KRİTİK GÜVENLİK OLAYLARI RAPORU ---")
@@ -136,6 +145,23 @@ def analyze_log(file_path):
 
         print(f"Toplam başarısız giriş: {total_failed_logins}")
         print(f"Risk Seviyesi: {risk_level}")
+
+        print("\n--- SALDIRI ZAMAN ANALİZİ ---")
+
+        if attack_times:
+            time_counts = Counter(attack_times)
+
+            for time, count in time_counts.items():
+                print(f"{time}: {count} başarısız giriş")
+
+            most_common_time, most_common_count = time_counts.most_common(1)[0]
+
+            print(
+                f"\nEn yoğun saldırı zamanı: "
+                f"{most_common_time} ({most_common_count} başarısız giriş)"
+            )
+        else:
+            print("Saldırı zamanı tespit edilemedi.")
 
 
         report_lines.append("=== GÜVENLİK RAPORU ===")
