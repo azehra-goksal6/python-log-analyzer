@@ -11,5 +11,13 @@ root -> 1 başarısız giriş
 user2 -> 1 başarısız giriş
 user -> 3 başarısız giriş
 
+Saldırı Zaman Analizi:
+İlk saldırı zamanı: Nov 25 10:00:20
+Son saldırı zamanı: Nov 25 10:01:10
+Saldırı süresi: 50 saniye
+Toplam başarısız giriş: 5
+UYARI: 60 saniye içerisinde 5 başarısız giriş tespit edildi!
+Durum: YOĞUN BAŞARISIZ GİRİŞ TRAFİĞİ
+
 Brute-force:
 203.0.113.1 -> TESPİT EDİLDİ (4 başarısız giriş)

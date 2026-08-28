@@ -18,6 +18,9 @@ def analyze_log(file_path):
     failed_login_ips = []
     report_lines = []
     attack_times = []
+    failed_login_events = []
+
+
 
     try:
         with open(file_path, "r") as file:
@@ -41,6 +44,8 @@ def analyze_log(file_path):
                         )
 
                         ip_addresses.extend(ips)
+
+                        # Başarısız giriş yapan IP'leri kaydet
                         if keyword == "Failed password":
 
                             time_match = re.search(
@@ -48,8 +53,12 @@ def analyze_log(file_path):
                                 line
                             )
 
+                            username = None
+                            timestamp = None
+
                             if time_match:
-                                attack_times.append(time_match.group(1))
+                                timestamp = time_match.group(1)
+                                attack_times.append(timestamp)
 
                             user_match = re.search(
                                 r'Failed password for (?:invalid user )?(\w+)',
@@ -58,11 +67,17 @@ def analyze_log(file_path):
                             )
 
                             if user_match:
-                                usernames.append(user_match.group(1))
+                                username = user_match.group(1)
+                                usernames.append(username)
 
-                            # Başarısız giriş yapan IP'leri kaydet
-                            if keyword == "Failed password":
-                                failed_login_ips.extend(ips)    
+                            failed_login_ips.extend(ips)
+
+                            if ips:
+                                failed_login_events.append({
+                                    "ip": ips[0],
+                                    "username": username,
+                                    "time": timestamp
+                                })    
                         break
 
         print("--- KRİTİK GÜVENLİK OLAYLARI RAPORU ---")
@@ -149,17 +164,42 @@ def analyze_log(file_path):
         print("\n--- SALDIRI ZAMAN ANALİZİ ---")
 
         if attack_times:
-            time_counts = Counter(attack_times)
+            from datetime import datetime
 
-            for time, count in time_counts.items():
-                print(f"{time}: {count} başarısız giriş")
+            attack_datetimes = []
 
-            most_common_time, most_common_count = time_counts.most_common(1)[0]
+            for time in attack_times:
+                try:
+                    attack_datetimes.append(
+                        datetime.strptime(f"2025 {time}", "%Y %b %d %H:%M:%S")
+                    )
+                except ValueError:
+                    continue
 
-            print(
-                f"\nEn yoğun saldırı zamanı: "
-                f"{most_common_time} ({most_common_count} başarısız giriş)"
-            )
+            if attack_datetimes:
+                first_attack = min(attack_datetimes)
+                last_attack = max(attack_datetimes)
+
+                duration = last_attack - first_attack
+                total_attack_count = len(attack_datetimes)
+
+                print(f"İlk saldırı zamanı: {first_attack.strftime('%b %d %H:%M:%S')}")
+                print(f"Son saldırı zamanı: {last_attack.strftime('%b %d %H:%M:%S')}")
+                print(f"Saldırı süresi: {duration.total_seconds():.0f} saniye")
+                print(f"Toplam başarısız giriş: {total_attack_count}")
+
+                if duration.total_seconds() <= 60 and total_attack_count >= 3:
+                    print(
+                        f"\nUYARI: 60 saniye içerisinde "
+                        f"{total_attack_count} başarısız giriş tespit edildi!"
+                    )
+                    print("Durum: YOĞUN BAŞARISIZ GİRİŞ TRAFİĞİ")
+                else:
+                    print("\nDurum: Normal")
+
+            else:
+                print("Saldırı zamanı analiz edilemedi.")
+
         else:
             print("Saldırı zamanı tespit edilemedi.")
 
@@ -183,6 +223,33 @@ def analyze_log(file_path):
             report_lines.append(
                 f"{user} -> {count} başarısız giriş"
             )
+        report_lines.append("\nSaldırı Zaman Analizi:")
+
+        if attack_datetimes:
+            report_lines.append(
+                f"İlk saldırı zamanı: {first_attack.strftime('%b %d %H:%M:%S')}"
+            )
+            report_lines.append(
+                f"Son saldırı zamanı: {last_attack.strftime('%b %d %H:%M:%S')}"
+            )
+            report_lines.append(
+                f"Saldırı süresi: {duration.total_seconds():.0f} saniye"
+            )
+            report_lines.append(
+                f"Toplam başarısız giriş: {total_attack_count}"
+            )
+
+            if duration.total_seconds() <= 60 and total_attack_count >= 3:
+                report_lines.append(
+                    f"UYARI: 60 saniye içerisinde {total_attack_count} "
+                    "başarısız giriş tespit edildi!"
+                )
+                report_lines.append("Durum: YOĞUN BAŞARISIZ GİRİŞ TRAFİĞİ")
+            else:
+                report_lines.append("Durum: Normal")
+        else:
+            report_lines.append("Saldırı zamanı analiz edilemedi.")
+
 
         report_lines.append("\nBrute-force:")
 
