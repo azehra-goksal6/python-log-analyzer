@@ -46,7 +46,7 @@ ERROR: 1
 ```
 ### IP Adresleri
 
-Log dosyalarında bulunan IP adreslerini ve kaç olayla ilişkili olduklarını gösterir.
+Başarısız girişlerle ilişkili IP adreslerini ve kaç başarısız giriş gerçekleştirdiklerini gösterir.
 
 Örnek:
 
