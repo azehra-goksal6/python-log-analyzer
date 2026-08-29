@@ -19,6 +19,7 @@ def analyze_log(file_path):
     report_lines = []
     attack_times = []
     failed_login_events = []
+    attack_datetimes = []
 
 
 
@@ -166,7 +167,6 @@ def analyze_log(file_path):
         if attack_times:
             from datetime import datetime
 
-            attack_datetimes = []
 
             for time in attack_times:
                 try:
